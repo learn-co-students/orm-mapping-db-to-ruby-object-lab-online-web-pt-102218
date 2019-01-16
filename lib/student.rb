@@ -1,19 +1,63 @@
+require 'pry'
 class Student
   attr_accessor :id, :name, :grade
 
   def self.new_from_db(row)
-    # create a new Student object given a row from the database
+    new_student = self.new
+    new_student.id = row[0]
+    new_student.name = row[1]
+    new_student.grade = row[2]
+    new_student
   end
 
   def self.all
-    # retrieve all the rows from the "Students" database
-    # remember each row should be a new instance of the Student class
+    sql = "SELECT * FROM students"
+    DB[:conn].execute(sql).map do |i| 
+      self.new_from_db(i)
+    end
   end
 
   def self.find_by_name(name)
-    # find the student in the database given a name
-    # return a new instance of the Student class
+    sql = "SELECT * FROM students WHERE name = ?"
+    DB[:conn].execute(sql, name).map do |i| 
+      self.new_from_db(i)
+    end.first
   end
+  
+  def self.all_students_in_grade_9
+    sql = "SELECT * FROM students WHERE grade = '9'"
+    this = DB[:conn].execute(sql)
+  end
+  
+  def self.students_below_12th_grade 
+    arr = []
+    sql = "SELECT * FROM students WHERE grade <= 11"
+    data = DB[:conn].execute(sql).flatten
+    sam = self.new_from_db(data)
+    arr << sam
+  end
+  
+  def self.first_X_students_in_grade_10(number)
+   sql = "SELECT * FROM students WHERE grade = 10 LIMIT ?"
+   DB[:conn].execute(sql, number)
+  end
+  
+  def self.first_student_in_grade_10 
+    arr = []
+    sql = "SELECT * FROM students WHERE grade = 10 LIMIT 1"
+    data = DB[:conn].execute(sql).flatten
+    student = self.new_from_db(data)
+    
+  end 
+  
+  def self.all_students_in_grade_X(grade)
+    arr = []
+    sql = "SELECT * FROM students WHERE grade = ?"
+    data = DB[:conn].execute(sql, grade).map do |i| 
+      self.new_from_db(i)
+    end
+  end 
+
   
   def save
     sql = <<-SQL
