@@ -46,16 +46,45 @@ class Student
     end
   end
 
+  def self.first_X_students_in_grade_10(size)
+    sql = <<-SQL
+    SELECT * FROM students WHERE grade = 10 LIMIT ?
+    SQL
+
+    DB[:conn].execute(sql, size).map do |row|
+      self.new_from_db(row)
+    end
+  end
+
+  def self.first_student_in_grade_10
+    sql = <<-SQL
+    SELECT * FROM students WHERE grade = 10
+    SQL
+    DB[:conn].execute(sql).map do |row|
+      self.new_from_db(row)
+    end.first
+  end
+
+  def self.all_students_in_grade_X(grade)
+    sql = <<-SQL
+    SELECT * FROM students WHERE grade = ?
+    SQL
+
+    DB[:conn].execute(sql, grade).map do |row|
+      self.new_from_db(row)
+    end
+  end
+
   def self.find_by_name(name)
     # find the student in the database given a name
     # return a new instance of the Student class
     sql = <<-SQL
-    SELECT students.name FROM students WHERE name = ?
+    SELECT * FROM students WHERE name = ? LIMIT 1
     SQL
 
-    DB[:conn].execute(sql).map do |name|
-      self.new_from_db(name)
-    end
+    DB[:conn].execute(sql, name).map do |row|
+      self.new_from_db(row)
+    end.first
   end
 
   def save
